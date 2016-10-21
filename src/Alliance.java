@@ -3,7 +3,6 @@ import java.util.*;
 public class Alliance<T>{
 
 	private LinkedList<LinkedList<Node<T>>> adjacencyList;
-	private int numOfVertices;
 	
 	public Alliance(){
 		adjacencyList = new LinkedList<LinkedList<Node<T>>>();
@@ -65,6 +64,8 @@ public class Alliance<T>{
 	/*END*/
 	}
 	
+	/*does a BFS on the adjacencyList with source node opponent1
+	 * and target node opponent 2*/
 	private int BFS(T opponent1, T opponent2){
 		List<T> visited = new ArrayList<T>(sizeOfAdjList(adjacencyList));
 		Node<T> source = findElement(opponent1);
@@ -95,6 +96,7 @@ public class Alliance<T>{
 		return 0;
 	}
 	
+	/*for the given element, find the corresponding Node for that element*/
 	private Node<T> findElement(T opponent){
 		for (List<Node<T>> list : adjacencyList){
 			if(list.get(0).getData().equals(opponent))
@@ -103,6 +105,7 @@ public class Alliance<T>{
 		return null;
 	}
 	
+	/*for the given node, find all adjacent elements of that node*/
 	private List<Node<T>> getListOfNeighbors(Node<T> opponent){
 		List<Node<T>> neighbors  = new ArrayList<Node<T>>();
 		for (int i = 0; i < adjacencyList.size(); i++){
@@ -116,6 +119,7 @@ public class Alliance<T>{
 		return neighbors;
 	}
 	
+	/*finds the number of vertices in the adjacencyList*/
 	private int sizeOfAdjList(LinkedList<LinkedList<Node<T>>> adjacencyList){
 		int numOfVertices = 0;
 		for(List<Node<T>> list : adjacencyList){
@@ -145,6 +149,7 @@ public class Alliance<T>{
 			this.distance = distance;
 		}
 		
+		/*get distance at this node*/
 		private int getDistance(){
 			return this.distance;
 		}
