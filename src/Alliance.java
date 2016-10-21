@@ -2,21 +2,23 @@ import java.util.*;
 
 public class Alliance<T>{
 
-	private Map<T, LinkedList<T>> adjacencyList;
-	//private int numOfVertices;
+	private LinkedList<LinkedList<Node<T>>> adjacencyList;
+	private int numOfVertices;
 	
 	public Alliance(){
-		adjacencyList = new HashMap<T, LinkedList<T>>();
-		//adjacencyList.
+		adjacencyList = new LinkedList<LinkedList<Node<T>>>();
 	}
+	
 	/*precondition: x is the new object to be inserted in the graph
 	postcondition: if the insertion is successful, x is in the graph*/
 	/*CREATE(x)*/
 	public void create(T element){
 		/*IF x is NOT contained in the list*/
-		if(!adjacencyList.containsKey(element)){
+		if(this.findElement(element) == null) {
+			LinkedList<Node<T>> list = new LinkedList<Node<T>>();
+			list.add(new Node<T>(element));
 			/*ADD x to the list*/
-			adjacencyList.put(element, new LinkedList<T>());
+			adjacencyList.add(list);
 		}
 	/*END*/
 	}
@@ -25,19 +27,23 @@ public class Alliance<T>{
 	postcondition: if x and y belong to different sides, they will be added to the graph*/
 	/*OPPOSE(x,y)*/
 	public void oppose(T opponent1, T opponent2){
-		/*IF x is contained in the list*/
-		if(adjacencyList.containsKey(opponent1)){
-			/*ADD y to the end of the list at that index*/
-			LinkedList<T> targetList = adjacencyList.get(opponent1);
-			targetList.addLast(opponent2);
+		boolean added = false;
+		for(List<Node<T>> list : adjacencyList){
+			/*IF x is contained in the list*/
+			if(list.get(0).getData().equals(opponent1)){
+				/*ADD y to the end of the list at that index*/
+				list.add(new Node<T>(opponent2));
+				added = true;
+			}
 		}
 		/*ELSE*/
-		else{
+		if(added == false){
+			LinkedList<Node<T>> list = new LinkedList<Node<T>>();
 			/*ADD x to the end of the list*/
-			adjacencyList.put(opponent1, new LinkedList<T>());
+			list.add(new Node<T>(opponent1));
 			/*ADD y as the first element of the new list*/
-			LinkedList<T> targetList = adjacencyList.get(opponent1);
-			targetList.addFirst(opponent2);
+			list.add(new Node<T>(opponent2));
+			adjacencyList.add(list);
 		}
 	/*END*/
 	}
@@ -48,21 +54,100 @@ public class Alliance<T>{
 	public boolean opponents(T opponent1, T opponent2){
 		/*num_edges from x to y = BFS(x,y)*/
 		int num_edges = BFS(opponent1, opponent2);
-		/*IF y is Reachable from x2 AND num_edges MOD 2 != 0*/ 
+		/*IF y is Reachable from x AND num_edges MOD 2 != 0*/ 
+		if((num_edges % 2) != 0)
 			/*RETURN true*/
+			return true;
 		/*ELSE*/
+		else
 			/*RETURN false*/
-		return false;
+			return false;
 	/*END*/
 	}
 	
 	private int BFS(T opponent1, T opponent2){
-		LinkedList<T> target = adjacencyList.get(opponent1);
-		for(int i = 0; i < target.size(); i++){
+		List<T> visited = new ArrayList<T>(sizeOfAdjList(adjacencyList));
+		Node<T> source = findElement(opponent1);
+		
+		LinkedList<Node<T>> queue = new LinkedList<Node<T>>();
+		source.distance = 0;
+		visited.add(source.getData());
+		queue.add(source);
+		
+		while(queue.size() != 0){
+			Node<T> opponent = queue.poll();
+			List<Node<T>> neighbors = new ArrayList<Node<T>>();
+			neighbors.addAll(getListOfNeighbors(opponent));
 			
+			for(int i = 0; i < neighbors.size(); i++){
+				neighbors.get(i).setDistance(opponent.distance + 1);
+				if(neighbors.get(i).getData().equals(opponent2)){
+					return neighbors.get(i).getDistance();
+				}
+				else {
+					if(!visited.contains(neighbors.get(i).getData())){
+						visited.add(neighbors.get(i).getData());
+						queue.add(neighbors.get(i));
+					}
+				}
+			}
+		}
+		return 0;
+	}
+	
+	private Node<T> findElement(T opponent){
+		for (List<Node<T>> list : adjacencyList){
+			if(list.get(0).getData().equals(opponent))
+				return list.get(0);
+		}		
+		return null;
+	}
+	
+	private List<Node<T>> getListOfNeighbors(Node<T> opponent){
+		List<Node<T>> neighbors  = new ArrayList<Node<T>>();
+		for (int i = 0; i < adjacencyList.size(); i++){
+			if(adjacencyList.get(i).get(0).getData().equals(opponent.getData())){
+				for(int k = 1; k < adjacencyList.get(i).size(); k++){
+					neighbors.add(adjacencyList.get(i).get(k));
+				}
+				return neighbors;
+			}
+		}		
+		return neighbors;
+	}
+	
+	private int sizeOfAdjList(LinkedList<LinkedList<Node<T>>> adjacencyList){
+		int numOfVertices = 0;
+		for(List<Node<T>> list : adjacencyList){
+			numOfVertices += list.size();
+		}
+		return numOfVertices;
+	}
+	
+	/*private inner class to represent the generic nodes*/
+	private class Node<T>{
+		
+		private T element;
+		private int distance;
+		
+		/*Node constructor*/
+		private Node(T element){
+			this.element = element;
 		}
 		
-		return 0;
+		/*get opponent at this node*/
+		private T getData(){
+			return this.element;
+		}
+		
+		/*set distance at this node*/
+		private void setDistance(int distance){
+			this.distance = distance;
+		}
+		
+		private int getDistance(){
+			return this.distance;
+		}
 	}
 }
 
